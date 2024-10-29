@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Task;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
 
 class TaskController extends Controller
 {
@@ -11,9 +14,29 @@ class TaskController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = Task::query();
+
+        // Filter by status
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by due_date
+        if ($request->has('due_date')) {
+            $query->whereDate('due_date', $request->due_date);
+        }
+
+        // Search by title
+        if ($request->has('search')) {
+            $query->where('title', 'LIKE', '%' . $request->search . '%');
+        }
+
+        // Paginate the results
+        $tasks = $query->paginate(10);
+
+        return response()->json($tasks);
     }
 
     /**
