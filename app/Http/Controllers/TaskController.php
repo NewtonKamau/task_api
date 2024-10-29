@@ -101,7 +101,17 @@ class TaskController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $task = Task::findOrFail($id);
+
+        $validatedData = $request->validate([
+            'title' => 'sometimes|required|unique:tasks,title,' . $id,
+            'description' => 'nullable|string',
+            'status' => ['nullable', Rule::in(['pending', 'completed'])],
+            'due_date' => 'sometimes|required|date|after:today',
+        ]);
+
+        $task->update($validatedData);
+        return response()->json($task);
     }
 
     /**
